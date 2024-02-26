@@ -3,22 +3,22 @@ import os
 
 def decompress_archive ( zip_path : str , extract_to : str ) -> None :
     """
-    Decompresse l ’ archive ZIP specifiee dans le chemin zip_path
-    vers le repertoire extract_to .
+    Decompresse l’ archive ZIP specifiee dans le chemin zip_path
+    vers le repertoire extract_to.
     : param zip_path : Chemin vers le fichier ZIP a decompresser
     : param extract_to : Repertoire de destination pour les fichiers
-    extraits .
+    extraits.
     """
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
+    with zipfile.ZipFile(zip_path, 'r') as zip:
+        zip.extractall(extract_to)
 
 
 def organize_files ( directory : str ) -> None :
     """
     Organise les fichiers dans le repertoire specifie en les
-    classant dans des sous - dossiers selon leur type .
+    classant dans des sous - dossiers selon leur type.
     : param directory : Chemin du repertoire contenant les fichiers a
-    organiser .
+    organiser.
     """
     # Dictionnaire des extensions de fichiers et de leurs catégories correspondantes
     file_types = {
@@ -47,6 +47,11 @@ def organize_files ( directory : str ) -> None :
                 os.rename(file_path, os.path.join(folder_path, filename))
 
 
+decompress_archive("C:/Users/ethan/Downloads/phase1_resources.zip", "C:/Users/ethan/Downloads/test_extraction")
+
+
+
+"""
 # Exemple d'utilisation
 if __name__ == "__main__":
     # Décompresser l'archive
@@ -54,3 +59,4 @@ if __name__ == "__main__":
 
     # Organiser les fichiers
     organize_files("C:/Users\ethan\Downloads/test")
+"""
