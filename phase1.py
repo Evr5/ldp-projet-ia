@@ -30,3 +30,6 @@ def organize_files ( directory : str ) -> None :
             if not os.path.exists(folder):
                 os.makedirs(folder)
             os.rename(file_path, os.path.join(folder, file))    # Déplace le fichier dans le dossier
+
+
+decompress_archive("C:/Users/ethan/Downloads/phase1_resources.zip", "C:/Users/ethan/Downloads/test")
