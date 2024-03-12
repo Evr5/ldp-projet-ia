@@ -32,4 +32,4 @@ def organize_files ( directory : str ) -> None :
             os.rename(file_path, os.path.join(folder, file))    # Déplace le fichier dans le dossier
 
 
-decompress_archive("C:/Users/ethan/Downloads/phase1_resources.zip", "C:/Users/ethan/Downloads/test")
+organize_files("C:/Users/ethan/Downloads/test")

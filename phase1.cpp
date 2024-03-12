@@ -1,10 +1,28 @@
-#include <string >
-#include <filesystem >
 #include <iostream>
+#include <string>
+#include <filesystem>
+#include <fstream>
+#include <map>
 
-namespace fs = std:: filesystem;
+namespace fs = std::filesystem;
 
-void analyze_folders(const std:: string& directory_path) {
+void check_confidentiality(const std::string& file_path, std::map<std::string, int>& confidential_files) {
+    std::string extension = fs::path(file_path).extension().string();
+
+    // Vérifie les fichiers texte pour la confidentialité
+    if (extension == ".html"  or extension == ".txt") {
+        std::ifstream file_stream(file_path);
+        if (file_stream.is_open()) {
+            std::string first_line;
+            std::getline(file_stream, first_line);
+            if (first_line.find("Licence: free access") != 0) {
+                confidential_files[extension]++;
+            }
+        }
+    }
+}
+
+void analyze_folders(const std::string& directory_path) {
     /**
     * Parcourt les repertoires organises pour identifier le nombre
     de fichiers par categorie
@@ -18,23 +36,47 @@ void analyze_folders(const std:: string& directory_path) {
     * @param directory_path Chemin du repertoire contenant les
     fichiers organises .
     */
+    std::map<std::string, std::map<std::string, int>> file_counts;
+    std::map<std::string, std::map<std::string, int>> confidential_files;
 
-    for (const auto& entry : fs::directory_iterator(directory_path)) {
-        if (fs::is_regular_file(entry)) {
-            // Obtenir l'extension du fichier
-            std::string extension = entry.path().extension().string();
-            // Supprimer le point de l'extension
-            if (!extension.empty() && extension[0] == '.')
-                extension = extension.substr(1);
-            // Ajouter l'extension à l'ensemble
-            extension.insert(extension);
+    for (const auto& entry : fs::recursive_directory_iterator(directory_path)) {
+        if (entry.is_directory()) {
+            // Uniquement les fichiers dans les sous-dossiers
+            continue;
+        }
+
+        std::string file_path = entry.path().string();
+        std::string subfolders = entry.path().parent_path().filename().string();
+        std::string extension = entry.path().extension().string();
+
+        file_counts[subfolders][extension]++;
+
+        // Vérifie la confidentialité si .html ou .txt
+        if (extension == ".html" or extension == ".txt") {
+            check_confidentiality(file_path, confidential_files[subfolders]);
+        } else {
+            // Sinon le compteur de confidentialité est N/A
+            confidential_files[subfolders][extension] = -1;
         }
     }
 
+    // Affiche le rapport d'analyse
+    std::cout<<"Resume par Categorie"<<std::endl;
+    for (const auto& [folder, extensions] : file_counts) {
+        std::cout<<"\n"<< folder<<":"<<std::endl;
+        for (const auto& [extension, count] : extensions) {
+            std::cout<<"- Nombre de fichiers: "<<count<<std::endl;
+            if (confidential_files[folder][extension] >= 0) {
+                std::cout<<"- Fichiers avec problemes de confidentialite: "<<confidential_files[folder][extension]<<std::endl;
+            } else {
+                std::cout<<"- Fichiers avec problemes de confidentialite: N/A"<<std::endl;
+            }
+        }
+    }
 }
 
-int main(){
-    const std::string directory_path = "C:/Users/ethan/Downloads/test";
+int main() {
+    std::string directory_path = "C:/Users/ethan/Downloads/test"; // Mettez ici le chemin absolu ou relatif du répertoire à analyser
     analyze_folders(directory_path);
     return 0;
 }
