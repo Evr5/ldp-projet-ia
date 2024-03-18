@@ -2,25 +2,34 @@
 #include <string>
 #include <filesystem>
 #include <fstream>
-#include <map>
+#include <vector>
 
 namespace fs = std::filesystem;
 
-void check_confidentiality(const std::string& file_path, std::map<std::string, int>& confidential_files) {
+void check_confidentiality(const std::string& file_path, std::vector<std::pair<std::string, int>>& confidential_files) {
     std::string extension = fs::path(file_path).extension().string();
 
-    // Vérifie les fichiers texte pour la confidentialité
-    if (extension == ".html"  or extension == ".txt") {
-        std::ifstream file_stream(file_path);
-        if (file_stream.is_open()) {
-            std::string first_line;
-            std::getline(file_stream, first_line);
-            if (first_line.find("Licence: free access") != 0) {
-                confidential_files[extension]++;
+    // Vérifation de la confidentialité pours les .html et .txt
+    std::ifstream file_stream(file_path);
+    if (file_stream.is_open()) {
+        std::string first_line;
+        std::getline(file_stream, first_line);
+        if (first_line.find("Licence: free access") != 0) {
+            bool found = false;
+            for(auto& pair : confidential_files) {
+                if(pair.first == extension) {
+                    pair.second++;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                confidential_files.emplace_back(extension, 1);
             }
         }
     }
 }
+
 
 void analyze_folders(const std::string& directory_path) {
     /**
@@ -36,12 +45,12 @@ void analyze_folders(const std::string& directory_path) {
     * @param directory_path Chemin du repertoire contenant les
     fichiers organises .
     */
-    std::map<std::string, std::map<std::string, int>> file_counts;
-    std::map<std::string, std::map<std::string, int>> confidential_files;
+    std::vector<std::pair<std::string, std::vector<std::pair<std::string, int>>>> file_counts;
+    std::vector<std::pair<std::string, std::vector<std::pair<std::string, int>>>> confidential_files;
 
     for (const auto& entry : fs::recursive_directory_iterator(directory_path)) {
         if (entry.is_directory()) {
-            // Uniquement les fichiers dans les sous-dossiers
+            // Juste les fichiers dans les sous-dossiers
             continue;
         }
 
@@ -49,34 +58,94 @@ void analyze_folders(const std::string& directory_path) {
         std::string subfolders = entry.path().parent_path().filename().string();
         std::string extension = entry.path().extension().string();
 
-        file_counts[subfolders][extension]++;
+        bool find = false;
+        for(auto& folder : file_counts) {
+            if(folder.first == subfolders) {
+                bool found_ext = false;
+                for(auto& pair : folder.second) {
+                    if(pair.first == extension) {
+                        pair.second++;
+                        found_ext = true;
+                        break;
+                    }
+                }
+                if(!found_ext) {
+                    folder.second.emplace_back(extension, 1);
+                }
+                find = true;
+                break;
+            }
+        }
+        if(!find) {
+            file_counts.emplace_back(subfolders, std::vector<std::pair<std::string, int>>{{extension, 1}});
+        }
 
         // Vérifie la confidentialité si .html ou .txt
-        if (extension == ".html" or extension == ".txt") {
-            check_confidentiality(file_path, confidential_files[subfolders]);
+        if (extension == ".html" || extension == ".txt") {
+            find = false;
+            for(auto& folder : confidential_files) {
+                if(folder.first == subfolders) {
+                    check_confidentiality(file_path, folder.second);
+                    find = true;
+                    break;
+                }
+            }
+            if(!find) {
+                std::vector<std::pair<std::string, int>> vec;
+                check_confidentiality(file_path, vec);
+                confidential_files.emplace_back(subfolders, vec);
+            }
         } else {
             // Sinon le compteur de confidentialité est N/A
-            confidential_files[subfolders][extension] = -1;
+            bool found = false;
+            for(auto& folder : confidential_files) {
+                if(folder.first == subfolders) {
+                    folder.second.emplace_back(extension, -1);
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                confidential_files.emplace_back(subfolders, std::vector<std::pair<std::string, int>>{{extension, -1}});
+            }
         }
     }
 
-    // Affiche le rapport d'analyse
+    // Affichage du rapport d’Analyse
     std::cout<<"Resume par Categorie"<<std::endl;
-    for (const auto& [folder, extensions] : file_counts) {
-        std::cout<<"\n"<< folder<<":"<<std::endl;
-        for (const auto& [extension, count] : extensions) {
-            std::cout<<"- Nombre de fichiers: "<<count<<std::endl;
-            if (confidential_files[folder][extension] >= 0) {
-                std::cout<<"- Fichiers avec problemes de confidentialite: "<<confidential_files[folder][extension]<<std::endl;
-            } else {
-                std::cout<<"- Fichiers avec problemes de confidentialite: N/A"<<std::endl;
+    for (const auto& folder : file_counts) {
+        std::cout<<"\n"<<folder.first<<":"<<std::endl;
+        for (const auto& pair : folder.second) {
+            std::cout<<"- Nombre de fichiers: "<<pair.second<<std::endl;
+            bool found = false;
+            for(const auto& confidential_folder : confidential_files) {
+                if(confidential_folder.first == folder.first) {
+                    for(const auto& confidential_pair : confidential_folder.second) {
+                        if(confidential_pair.first == pair.first) {
+                            if(confidential_pair.second >= 0) {
+                                std::cout<<"- Fichiers avec problemes de confidentialite: ";
+                                if(confidential_pair.second == 0) {
+                                    std::cout<<"0"<<std::endl;
+                                } else {
+                                    std::cout<<confidential_pair.second<<std::endl;
+                                }
+                            } else {
+                                std::cout<<"- Fichiers avec problemes de confidentialite: N/A"<<std::endl;
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            if(!found) {
+                std::cout<<"- Fichiers avec problemes de confidentialite: 0"<<std::endl;
             }
         }
     }
 }
 
 int main() {
-    std::string directory_path = "C:/Users/ethan/Downloads/test"; // Mettez ici le chemin absolu ou relatif du répertoire à analyser
-    analyze_folders(directory_path);
     return 0;
 }
