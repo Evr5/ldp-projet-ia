@@ -1,4 +1,4 @@
-FLAGS=-WALL -Wextra
+FLAGS=-Wall -Wextra
 
 all: tf_idf
 
