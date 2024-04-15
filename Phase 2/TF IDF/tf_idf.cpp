@@ -5,21 +5,21 @@
 
 
 std::vector<std::string> readDocument(const std::string& filePath) {
-    std::vector<std::string> words;
+    std::vector<std::string> table;
     std::ifstream file(filePath);
     
     if (!file.is_open()) {
         std::cerr << "Erreur: Impossible d'ouvrir le fichier " << filePath << std::endl;
-        return words;
+        return table;
     }
 
     std::string word;
     while (file >> word) {
-        words.push_back(word);
+        table.push_back(word);
     }
 
     file.close();
-    return words;
+    return table;
 }
 
 std::map<std::string, double> computeTF(const std::vector<std::string>& words) {
