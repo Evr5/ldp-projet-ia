@@ -1,18 +1,24 @@
 #include <iostream>
 #include <string>
+#include <map>
+#include <vector>
 
 int main() {
-    // Déclaration d'une chaîne de caractères
-    std::string str = "Hello, world!";
+    std::vector<int> numbers;
+    for (int i = 0; i < 100; i++) {
+        numbers.push_back(5);
+        numbers.push_back(i);
+    }
 
-    // Affichage de la chaîne de caractères
-    std::cout << "Contenu de la chaine : " << str << std::endl;
+    std::map<int, int> numberCount;
+    for (const float num : numbers) {
+        numberCount[num]++;
+    }
 
-    // Modification de la chaîne de caractères
-    str += " Welcome to C++!";
-    
-    // Affichage de la chaîne de caractères modifiée
-    std::cout << "Nouveau contenu de la chaine : " << str << std::endl;
+    // Afficher les résultats
+    for (const auto& pair : numberCount) {
+        std::cout << "Nombre " << pair.first << " : " << pair.second << " occurrences\n";
+    }
 
     return 0;
 }
