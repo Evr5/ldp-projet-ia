@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 
 std::vector<std::string> readDocument(const std::string& filePath) {
@@ -13,8 +14,15 @@ std::vector<std::string> readDocument(const std::string& filePath) {
         return table;
     }
 
+    std::locale loc;
     std::string word;
     while (file >> word) {
+        // Convertit le mot en minuscules
+        for (char& c : word) {
+            c = std::tolower(c, loc);
+        }
+        // Enlève les signes de ponctuation
+        word.erase(std::remove_if(word.begin(), word.end(), [](char c) { return std::ispunct(c); }), word.end());
         table.push_back(word);
     }
 
@@ -33,8 +41,8 @@ std::map<std::string, double> computeTF(const std::vector<std::string>& words) {
 
     // Calcule la fréquence de chaque mot
     int totalWords = words.size();
-    for (auto pair : wordCount) {
-        tfMap[pair.first] = static_cast<double>(pair.second) / totalWords;
+    for (auto count : wordCount) {
+        tfMap[count.first] = static_cast<double>(count.second) / totalWords;
     }
 
     return tfMap;
@@ -85,12 +93,15 @@ void displayTFIDFScores(const std::map<std::string, double>& tfidfScores) {
 }
 
 int main(){
-    std::vector<std::string> words = readDocument("texte.txt");
+    std::vector<std::string> words = readDocument("medecine_1.txt");
 
-    // Imprime le contenu du vecteur
-    std::cout << "Contenu du vecteur :" << std::endl;
-    for (auto word : words) {
-        std::cout << word << std::endl;
+    std::map<std::string, double> TF = computeTF(words);
+
+    // Affichage des résultats
+    std::cout << "Frequence des mots :\n";
+    for (const auto& pair : TF) {
+        std::cout << pair.first << " : " << pair.second << '\n';
     }
+
     return 0;
 }
