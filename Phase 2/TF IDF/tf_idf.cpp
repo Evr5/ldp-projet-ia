@@ -11,7 +11,6 @@ std::vector<std::string> readDocument(const std::string& filePath) {
         std::cerr << "Erreur: Impossible d'ouvrir le fichier " << filePath << std::endl;
         return table;
     }
-
     std::locale loc;
     std::string word;
     while (file >> word) {
@@ -19,20 +18,17 @@ std::vector<std::string> readDocument(const std::string& filePath) {
         for (char& c : word) {
             c = std::tolower(c, loc);
         }
-
-    // Enlève les signes de ponctuation
-    std::string clean_word;
-    for (char c : word) {
-        if (std::isalnum(c, loc)) { // Vérifie si le caractère est une lettre ou un chiffre
-            clean_word += c;
+        // Enlève les signes de ponctuation
+        std::string clean_word;
+        for (char c : word) {
+            if (std::isalnum(c, loc)) { // Vérifie si le caractère est une lettre ou un chiffre
+                clean_word += c;
+            }
+        }
+        if (!clean_word.empty()) { // Ne pas ajouter de mot vide
+            table.push_back(clean_word);
         }
     }
-    
-    if (!clean_word.empty()) { // Ne pas ajouter de mot vide
-        table.push_back(clean_word);
-    }
-    }
-
     file.close();
     return table;
 }
@@ -69,8 +65,8 @@ std::map<std::string, double> computeIDF(const std::vector<std::map<std::string,
     }
 
     // Calculer l'IDF pour chaque mot
-    for (auto pair : docCount) {
-        idfMap[pair.first] = std::log10(static_cast<double>(totalDocuments) / pair.second);
+    for (auto doc : docCount) {
+        idfMap[doc.first] = std::log10(static_cast<double>(totalDocuments) / doc.second);
     }
 
     return idfMap;
@@ -80,12 +76,10 @@ std::map<std::string, double> calculateTFIDF(const std::map<std::string, double>
     std::map<std::string, double> tfidfScores;
 
     // Calculer le score TF-IDF pour chaque mot
-    for (auto pair : tf) {
-        auto it = idf.find(pair.first);
+    for (auto t : tf) {
+        auto it = idf.find(t.first);
         if (it != idf.end()) {
-            tfidfScores[pair.first] = pair.second * it->second;
-        } else {
-            std::cerr << "Erreur: IDF non trouvé pour le mot " << pair.first << std::endl;
+            tfidfScores[t.first] = t.second * it->second;
         }
     }
 
@@ -94,21 +88,11 @@ std::map<std::string, double> calculateTFIDF(const std::map<std::string, double>
 
 void displayTFIDFScores(const std::map<std::string, double>& tfidfScores) {
     // Affiche les scores TF-IDF pour chaque mot
-    for (auto pair : tfidfScores) {
-        std::cout << "Mot : " << pair.first << ", Score TF-IDF : " << pair.second << std::endl;
+    for (auto tfidf : tfidfScores) {
+        std::cout << tfidf.first << " : " << tfidf.second << std::endl;
     }
 }
 
-int main(){
-    std::vector<std::string> words = readDocument("medecine_1.txt");
-
-    std::map<std::string, double> TF = computeTF(words);
-
-    // Affichage des résultats
-    std::cout << "Frequence des mots :\n";
-    for (const auto& pair : TF) {
-        std::cout << pair.first << " : " << pair.second << '\n';
-    }
-
+int main() {
     return 0;
 }
