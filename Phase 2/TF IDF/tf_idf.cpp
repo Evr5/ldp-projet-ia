@@ -1,8 +1,6 @@
 #include "tf_idf.hpp"
 #include <fstream>
-#include <iostream>
 #include <cmath>
-#include <algorithm>
 
 
 std::vector<std::string> readDocument(const std::string& filePath) {
@@ -21,9 +19,18 @@ std::vector<std::string> readDocument(const std::string& filePath) {
         for (char& c : word) {
             c = std::tolower(c, loc);
         }
-        // Enlève les signes de ponctuation
-        word.erase(std::remove_if(word.begin(), word.end(), [](char c) { return std::ispunct(c); }), word.end());
-        table.push_back(word);
+
+    // Enlève les signes de ponctuation
+    std::string clean_word;
+    for (char c : word) {
+        if (std::isalnum(c, loc)) { // Vérifie si le caractère est une lettre ou un chiffre
+            clean_word += c;
+        }
+    }
+    
+    if (!clean_word.empty()) { // Ne pas ajouter de mot vide
+        table.push_back(clean_word);
+    }
     }
 
     file.close();
