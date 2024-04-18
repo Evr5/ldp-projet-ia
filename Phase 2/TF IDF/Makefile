@@ -1,8 +1,25 @@
-hello: tf_idf.o
-    g++ -o tf_idf tf_idf.o
+# Compiler options
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall
 
-hello.o: tf_idf.c
-    g++ -o tf_idf.o -c tf_idf.c -W -Wall
+# Source files
+SRCS = tf_idf.cpp
 
-main.o: tf_idf.c tf_idf.h
-    g++ -o tf_idf.o -c tf_idf.c -W -Wall
+# Object files
+OBJS = $(SRCS:.cpp=.o)
+
+# Executable name
+EXEC = tf_idf
+
+.PHONY: all clean
+
+all: $(EXEC)
+
+$(EXEC): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(EXEC)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJS) $(EXEC)
