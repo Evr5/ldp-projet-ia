@@ -8,25 +8,31 @@ std::vector<std::string> readDocument(const std::string& filePath) {
     std::ifstream file(filePath);
     
     if (!file.is_open()) {
-        std::cerr << "Erreur: Impossible d'ouvrir le fichier " << filePath << std::endl;
-        return table;
-    }
-    std::locale loc;
-    std::string word;
-    while (file >> word) {
-        // Convertit le mot en minuscules
-        for (char& c : word) {
-            c = std::tolower(c, loc);
-        }
-        // Enlève les signes de ponctuation
-        std::string clean_word;
-        for (char c : word) {
-            if (std::isalnum(c, loc)) { // Vérifie si le caractère est une lettre ou un chiffre
-                clean_word += c;
+        std::cerr << "Impossible d'ouvrir le fichier " << filePath << std::endl;
+    } else {
+        std::string word;
+        while (file >> word) {
+            // Convertit le mot en minuscules
+            for (char& c : word) {
+                c = std::tolower(c);
             }
-        }
-        if (!clean_word.empty()) { // Ne pas ajouter de mot vide
-            table.push_back(clean_word);
+            // Enlève les signes de ponctuation
+            std::string clean_word;
+            for (char c : word) {
+                if (std::isalnum(c)) { // Vérifie si le caractère est une lettre ou un chiffre
+                    clean_word += c;
+                } else if (std::ispunct(c)) { // Vérifie si le caractère est un signe de ponctuation
+                    // Si le signe de ponctuation est suivie d'une lettre, ajoute le mot précédent et commence un nouveau mot
+                    if (!clean_word.empty() && std::isalpha(clean_word.back())) {
+                        table.push_back(clean_word);
+                        clean_word.clear();
+                    }
+                }
+            }
+            // Ajoute le mot final s'il n'est pas vide
+            if (!clean_word.empty()) {
+                table.push_back(clean_word);
+            }
         }
     }
     file.close();
@@ -47,7 +53,6 @@ std::map<std::string, double> computeTF(const std::vector<std::string>& words) {
     for (auto count : wordCount) {
         tfMap[count.first] = static_cast<double>(count.second) / totalWords;
     }
-
     return tfMap;
 }
 
@@ -68,7 +73,6 @@ std::map<std::string, double> computeIDF(const std::vector<std::map<std::string,
     for (auto doc : docCount) {
         idfMap[doc.first] = std::log10(static_cast<double>(totalDocuments) / doc.second);
     }
-
     return idfMap;
 }
 
@@ -82,7 +86,6 @@ std::map<std::string, double> calculateTFIDF(const std::map<std::string, double>
             tfidfScores[t.first] = t.second * it->second;
         }
     }
-
     return tfidfScores;
 }
 
@@ -94,5 +97,13 @@ void displayTFIDFScores(const std::map<std::string, double>& tfidfScores) {
 }
 
 int main() {
+    std::string filePath = "ethan.txt";
+    std::vector<std::string> mots = readDocument(filePath);
+    
+    // Affichage du contenu du vecteur
+    std::cout << "Contenu du vecteur :" << std::endl;
+    for (const std::string& mot : mots) {
+        std::cout << mot << std::endl;
+    }
     return 0;
 }
