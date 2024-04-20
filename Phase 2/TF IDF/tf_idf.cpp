@@ -4,7 +4,7 @@
 
 
 std::vector<std::string> readDocument(const std::string& filePath) {
-    std::vector<std::string> table;
+    std::vector<std::string> list;
     std::ifstream file(filePath);
     
     if (!file.is_open()) {
@@ -12,31 +12,31 @@ std::vector<std::string> readDocument(const std::string& filePath) {
     } else {
         std::string word;
         while (file >> word) {
-            // Convertit le mot en minuscules
+            // Met le mot en minuscule
             for (char& c : word) {
                 c = std::tolower(c);
             }
             // Enlève les signes de ponctuation
             std::string clean_word;
             for (char c : word) {
-                if (std::isalnum(c)) { // Vérifie si le caractère est une lettre ou un chiffre
+                if (std::isalnum(c)) { // Ajoute le caractère s'il est alphanumérique
                     clean_word += c;
-                } else if (std::ispunct(c)) { // Vérifie si le caractère est un signe de ponctuation
-                    // Si le signe de ponctuation est suivie d'une lettre, ajoute le mot précédent et commence un nouveau mot
+                } else if (std::ispunct(c)) { // Si c'est un signe de ponctuation
+                    // S'il est suivie d'une lettre, on ajoute le mot précédent et on commence le nouveau mot
                     if (!clean_word.empty() && std::isalpha(clean_word.back())) {
-                        table.push_back(clean_word);
+                        list.push_back(clean_word);
                         clean_word.clear();
                     }
                 }
             }
             // Ajoute le mot final s'il n'est pas vide
             if (!clean_word.empty()) {
-                table.push_back(clean_word);
+                list.push_back(clean_word);
             }
         }
     }
     file.close();
-    return table;
+    return list;
 }
 
 std::map<std::string, double> computeTF(const std::vector<std::string>& words) {
