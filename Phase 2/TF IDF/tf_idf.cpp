@@ -19,14 +19,14 @@ std::vector<std::string> readDocument(const std::string& filePath) {
             // Enlève les signes de ponctuation
             std::string clean_word;
             for (char c : word) {
-                if (std::isalnum(c)) { // Ajoute le caractère s'il est alphanumérique
-                    clean_word += c;
-                } else if (std::ispunct(c)) { // Si c'est un signe de ponctuation
-                    // S'il est suivie d'une lettre, on ajoute le mot précédent et on commence le nouveau mot
+                if (std::ispunct(c)) { // On vérifie si le caractère est un signe de ponctuation
+                    // S'il est suivie d'une lettre, on ajoute le mot précédent en enlevant le signe et on commence le nouveau mot
                     if (!clean_word.empty() && std::isalpha(clean_word.back())) {
                         list.push_back(clean_word);
                         clean_word.clear();
                     }
+                } else {
+                    clean_word += c;
                 }
             }
             // Ajoute le mot final s'il n'est pas vide
@@ -40,70 +40,62 @@ std::vector<std::string> readDocument(const std::string& filePath) {
 }
 
 std::map<std::string, double> computeTF(const std::vector<std::string>& words) {
-    std::map<std::string, double> tfMap;
+    std::map<std::string, double> TFMap;
 
-    // Compte le nombre d'occurrences de chaque mot
+    // Compte le nombre de fois que les mots sont présent
     std::map<std::string, int> wordCount;
     for (const auto& word : words) {
         wordCount[word]++;
     }
 
-    // Calcule la fréquence de chaque mot
+    // Calcule le TF
     int totalWords = words.size();
-    for (auto count : wordCount) {
-        tfMap[count.first] = static_cast<double>(count.second) / totalWords;
+    for (auto word : wordCount) {
+        TFMap[word.first] = static_cast<double>(word.second) / totalWords;
     }
-    return tfMap;
+    return TFMap;
 }
 
 std::map<std::string, double> computeIDF(const std::vector<std::map<std::string, double>>& documentsTF, int totalDocuments) {
-    std::map<std::string, double> idfMap;
+    std::map<std::string, double> IDFMap;
 
-    // Compter le nombre de documents contenant chaque mot
+    // Compte le nombre de documents contenant chaque mot
     std::map<std::string, int> docCount;
-    for (auto document : documentsTF) {
-        for (auto pair : document) {
-            if (pair.second > 0) {
-                docCount[pair.first]++;
+    for (const auto document : documentsTF) {
+        for (const auto word : document) {
+            if (word.second > 0) {
+                docCount[word.first]++;
             }
         }
     }
 
-    // Calculer l'IDF pour chaque mot
+    // Calcule l'IDF
     for (auto doc : docCount) {
-        idfMap[doc.first] = std::log10(static_cast<double>(totalDocuments) / doc.second);
+        IDFMap[doc.first] = std::log10(static_cast<double>(totalDocuments) / doc.second);
     }
-    return idfMap;
+    return IDFMap;
 }
 
 std::map<std::string, double> calculateTFIDF(const std::map<std::string, double>& tf, const std::map<std::string, double>& idf) {
-    std::map<std::string, double> tfidfScores;
+    std::map<std::string, double> scores;
 
-    // Calculer le score TF-IDF pour chaque mot
-    for (auto t : tf) {
-        auto it = idf.find(t.first);
-        if (it != idf.end()) {
-            tfidfScores[t.first] = t.second * it->second;
+    // Calcule le score TF-IDF
+    for (auto wordTF : tf) {
+        auto wordIDF = idf.find(wordTF.first);
+        if (wordIDF != idf.end()) {
+            scores[wordTF.first] = wordTF.second * wordIDF->second;
         }
     }
-    return tfidfScores;
+    return scores;
 }
 
 void displayTFIDFScores(const std::map<std::string, double>& tfidfScores) {
-    // Affiche les scores TF-IDF pour chaque mot
-    for (auto tfidf : tfidfScores) {
-        std::cout << tfidf.first << " : " << tfidf.second << std::endl;
+    // Affiche les scores TF-IDF
+    for (const auto TFIDF : tfidfScores) {
+        std::cout << TFIDF.first << " : " << TFIDF.second << std::endl;
     }
 }
 
 int main() {
-    std::string filePath = "ethan.txt";
-    std::vector<std::string> mots = readDocument(filePath);
-    
-    // Affichage du contenu du vecteur
-    std::cout << "Contenu du vecteur :" << std::endl;
-    for (const std::string& mot : mots) {
-        std::cout << mot << std::endl;
-    }
-    return 0;
+   return 0;
 }
