@@ -33,15 +33,15 @@ std::string clean_word(std::string word){
     /*
     Fonction qui prend un mot de type string en paramètre, le met en minuscule et enlève les signes de ponctuations.
     */
-        for (char& c : word) {
-            c = std::tolower(c);
+    for (char& c : word) {
+        c = std::tolower(c);
+    }
+    std::string clean_word;
+    for (char& c : word) {
+        if (std::isalnum(c)) { // Vérifie si le caractère est une lettre ou un chiffre
+            clean_word += c;
         }
-        std::string clean_word;
-        for (char& c : word) {
-            if (std::isalnum(c)) { // Vérifie si le caractère est une lettre ou un chiffre
-                clean_word += c;
-            }
-        }
+    }
     return clean_word;
 }
 

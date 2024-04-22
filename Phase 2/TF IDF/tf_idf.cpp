@@ -97,5 +97,5 @@ void displayTFIDFScores(const std::map<std::string, double>& tfidfScores) {
 }
 
 int main() {
-   return 0;
+    return 0;
 }
