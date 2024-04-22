@@ -61,8 +61,8 @@ std::map<std::string, double> computeIDF(const std::vector<std::map<std::string,
 
     // Compte le nombre de documents contenant chaque mot
     std::map<std::string, int> doc_count;
-    for (const auto document : documentsTF) {
-        for (const auto word : document) {
+    for (const auto& document : documentsTF) {
+        for (const auto& word : document) {
             if (word.second > 0) {
                 doc_count[word.first]++;
             }
@@ -91,7 +91,7 @@ std::map<std::string, double> calculateTFIDF(const std::map<std::string, double>
 
 void displayTFIDFScores(const std::map<std::string, double>& tfidfScores) {
     // Affiche les scores TF-IDF
-    for (const auto TFIDF : tfidfScores) {
+    for (const auto& TFIDF : tfidfScores) {
         std::cout << TFIDF.first << " : " << TFIDF.second << std::endl;
     }
 }
