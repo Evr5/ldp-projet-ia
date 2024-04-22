@@ -40,50 +40,50 @@ std::vector<std::string> readDocument(const std::string& filePath) {
 }
 
 std::map<std::string, double> computeTF(const std::vector<std::string>& words) {
-    std::map<std::string, double> TFMap;
+    std::map<std::string, double> TF_map;
 
     // Compte le nombre de fois que les mots sont présent
-    std::map<std::string, int> wordCount;
+    std::map<std::string, int> word_count;
     for (const auto& word : words) {
-        wordCount[word]++;
+        word_count[word]++;
     }
 
     // Calcule le TF
-    int totalWords = words.size();
-    for (auto word : wordCount) {
-        TFMap[word.first] = static_cast<double>(word.second) / totalWords;
+    int total_words = words.size();
+    for (auto word : word_count) {
+        TF_map[word.first] = static_cast<double>(word.second) / total_words;
     }
-    return TFMap;
+    return TF_map;
 }
 
 std::map<std::string, double> computeIDF(const std::vector<std::map<std::string, double>>& documentsTF, int totalDocuments) {
-    std::map<std::string, double> IDFMap;
+    std::map<std::string, double> IDF_map;
 
     // Compte le nombre de documents contenant chaque mot
-    std::map<std::string, int> docCount;
+    std::map<std::string, int> doc_count;
     for (const auto document : documentsTF) {
         for (const auto word : document) {
             if (word.second > 0) {
-                docCount[word.first]++;
+                doc_count[word.first]++;
             }
         }
     }
 
     // Calcule l'IDF
-    for (auto doc : docCount) {
-        IDFMap[doc.first] = std::log10(static_cast<double>(totalDocuments) / doc.second);
+    for (auto doc : doc_count) {
+        IDF_map[doc.first] = std::log10(static_cast<double>(totalDocuments) / doc.second);
     }
-    return IDFMap;
+    return IDF_map;
 }
 
 std::map<std::string, double> calculateTFIDF(const std::map<std::string, double>& tf, const std::map<std::string, double>& idf) {
     std::map<std::string, double> scores;
 
     // Calcule le score TF-IDF
-    for (auto wordTF : tf) {
-        auto wordIDF = idf.find(wordTF.first);
-        if (wordIDF != idf.end()) {
-            scores[wordTF.first] = wordTF.second * wordIDF->second;
+    for (auto word_TF : tf) {
+        auto word_IDF = idf.find(word_TF.first);
+        if (word_IDF != idf.end()) {
+            scores[word_TF.first] = word_TF.second * word_IDF->second;
         }
     }
     return scores;
