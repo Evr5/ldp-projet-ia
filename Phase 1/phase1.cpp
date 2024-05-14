@@ -4,10 +4,9 @@
 #include <fstream>
 #include <vector>
 
-namespace fs = std::filesystem;
 
 void check_confidentiality(const std::string& file_path, std::vector<std::pair<std::string, int>>& confidential_files) {
-    std::string extension = fs::path(file_path).extension().string();
+    std::string extension = std::filesystem::path(file_path).extension().string();
 
     // Vérifation de la confidentialité pours les .html et .txt
     std::ifstream file_stream(file_path);
@@ -48,7 +47,7 @@ void analyze_folders(const std::string& directory_path) {
     std::vector<std::pair<std::string, std::vector<std::pair<std::string, int>>>> file_counts;
     std::vector<std::pair<std::string, std::vector<std::pair<std::string, int>>>> confidential_files;
 
-    for (const auto& entry : fs::recursive_directory_iterator(directory_path)) {
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(directory_path)) {
         if (entry.is_directory()) {
             // Juste les fichiers dans les sous-dossiers
             continue;
