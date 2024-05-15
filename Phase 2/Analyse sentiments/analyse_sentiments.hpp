@@ -1,21 +1,33 @@
 #include <vector>
 #include <iostream>
 
-struct SentimentDictionary {
+class SentimentDictionary {
+public:
+    void load(const std::string& positivePath, const std::string& negativePath);
+    bool isPositive(const std::string& word) const;
+    bool isNegative(const std::string& word) const;
+
+private:
     std::vector<std::string> positiveWords;
     std::vector<std::string> negativeWords;
 };
 
-struct AnalysisResult {
+class AnalysisResult {
+public:
+    AnalysisResult();
+    void incrementPositiveCount();
+    void incrementNegativeCount();
+    std::string getOverallSentiment() const;
+
+private:
     int positiveCount;
     int negativeCount;
-    std::string overallSentiment;
 };
 
-void loadSentimentDictionary(SentimentDictionary& dictionary, const std::string& positivePath, const std::string& negativePath);
+class SentimentAnalyzer {
+public:
+    AnalysisResult analyze(const SentimentDictionary& dictionary, const std::string& filePath) const;
 
-void loadSentimentDictionary(SentimentDictionary& dictionary, const std::string& positivePath, const std::string& negativePath);
-
-std::string clean_word(std::string word);
-
-AnalysisResult analyzeSentiment(const SentimentDictionary& dictionary, const std::string& filePath);
+private:
+    std::string cleanWord(const std::string& word) const;
+};

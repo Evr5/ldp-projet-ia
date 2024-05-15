@@ -2,86 +2,113 @@
 #include <fstream>
 
 
-void loadSentimentDictionary(SentimentDictionary& dictionary, const std::string& positivePath, const std::string& negativePath) {
-    std::ifstream positive_file(positivePath);
-
-    if (!positive_file.is_open()) {
+void SentimentDictionary::load(const std::string& positivePath, const std::string& negativePath) {
+    std::ifstream positiveFile(positivePath);
+    if (!positiveFile.is_open()) {
         std::cerr << "Impossible d'ouvrir le fichier " << positivePath << " des mots positifs." << std::endl;
     } else {
         std::string word;
         // Ajoute le mot au dictionnaire tant qu'il y a un mot 
-        while (positive_file >> word) {
-            dictionary.positiveWords.push_back(word);
+        while (positiveFile >> word) {
+            positiveWords.push_back(word);
         }
-        positive_file.close();
-    } 
+        positiveFile.close();
+    }
 
-    std::ifstream negative_file(negativePath);
-    if (!negative_file.is_open()) {
-         std::cerr << "Impossible d'ouvrir le fichier " << negativePath << " des mots negatifs." << std::endl;
+    std::ifstream negativeFile(negativePath);
+    if (!negativeFile.is_open()) {
+        std::cerr << "Impossible d'ouvrir le fichier " << negativePath << " des mots negatifs." << std::endl;
     } else {
         std::string word;
-        // Ajoute le mot au dictionnaire tant qu'il y a un mot
-        while (negative_file >> word) {
-            dictionary.negativeWords.push_back(word);
+        // Ajoute le mot au dictionnaire tant qu'il y a un mot 
+        while (negativeFile >> word) {
+            negativeWords.push_back(word);
         }
-        negative_file.close();
+        negativeFile.close();
     }
 }
 
-std::string clean_word(std::string word){
+bool SentimentDictionary::isPositive(const std::string& word) const {
+    for (const auto& positiveWord : positiveWords) {
+        if (positiveWord == word) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SentimentDictionary::isNegative(const std::string& word) const {
+    for (const auto& negativeWord : negativeWords) {
+        if (negativeWord == word) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+AnalysisResult::AnalysisResult() : positiveCount(0), negativeCount(0) {}
+
+void AnalysisResult::incrementPositiveCount() {
+    positiveCount++;
+}
+
+void AnalysisResult::incrementNegativeCount() {
+    negativeCount++;
+}
+
+std::string AnalysisResult::getOverallSentiment() const {
+    /*
+    Détermine si le texte est positif, negatif ou neutre
+    */
+
+    if (positiveCount > negativeCount) {
+        return "Positif";
+    } else if (positiveCount < negativeCount) {
+        return "Negatif";
+    } else {
+        return "Neutre";
+    }
+}
+
+
+AnalysisResult SentimentAnalyzer::analyze(const SentimentDictionary& dictionary, const std::string& filePath) const {
+    AnalysisResult result;
+
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "Le fichier " << filePath << " n'a pas pu etre ouvert." << std::endl;
+        return result;
+    }
+
+    std::string word;
+    // Tant qu'il y a un mot, on vérifie s'il est dans le dicionnaire et on met à jour 
+    // le comptage des mots positifs et négatifs
+    while (file >> word) {
+        word = cleanWord(word);
+        if (dictionary.isPositive(word)) {
+            result.incrementPositiveCount();
+        }
+        if (dictionary.isNegative(word)) {
+            result.incrementNegativeCount();
+        }
+    }
+
+    file.close();
+    return result;
+}
+
+std::string SentimentAnalyzer::cleanWord(const std::string& word) const {
     /*
     Fonction qui prend un mot de type string en paramètre, le met en minuscule et enlève les signes de ponctuations.
     */
-    for (char& c : word) {
-        c = std::tolower(c);
-    }
-    std::string clean_word;
-    for (char& c : word) {
+    std::string cleanedWord;
+    for (char c : word) {
         if (std::isalnum(c)) { // Vérifie si le caractère est une lettre ou un chiffre
-            clean_word += c;
+            cleanedWord += std::tolower(c);
         }
     }
-    return clean_word;
-}
-
-AnalysisResult analyzeSentiment(const SentimentDictionary& dictionary, const std::string& filePath) {
-    AnalysisResult result;
-    result.positiveCount = 0;
-    result.negativeCount = 0;
-
-    std::ifstream file(filePath);
-    if (!file.is_open()){
-        std::cerr << "Le fichier " << filePath << " n'a pas pu etre ouvert." << std::endl;
-    } else {
-        std::string word;
-        // Tant qu'il y a un mot, on vérifie s'il est dans le dicionnaire et om met à jour 
-        // le comptage des mots positifs et négatifs
-        while (file >> word) {
-            word = clean_word(word);
-            for (const auto &positiveWord : dictionary.positiveWords) {
-                if (positiveWord == word) {
-                    result.positiveCount++;
-                }
-            }
-            for (const auto &negativeWord : dictionary.negativeWords) {
-                if (negativeWord == word) {
-                    result.negativeCount++;
-                }
-            }
-        }
-        file.close();
-
-        // Détermine si le texte est positif, negatif ou neutre
-        if (result.positiveCount > result.negativeCount) {
-            result.overallSentiment = "Positif";
-        } else if (result.positiveCount < result.negativeCount) {
-            result.overallSentiment = "Negatif";
-        } else {
-            result.overallSentiment = "Neutre";
-        }
-    }
-    return result;
+    return cleanedWord;
 }
 
 int main() {
