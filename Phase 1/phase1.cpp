@@ -1,8 +1,6 @@
-#include <iostream>
-#include <string>
+#include "phase1.hpp"
 #include <filesystem>
 #include <fstream>
-#include <vector>
 
 
 void check_confidentiality(const std::string& file_path, std::vector<std::pair<std::string, int>>& confidential_files) {
