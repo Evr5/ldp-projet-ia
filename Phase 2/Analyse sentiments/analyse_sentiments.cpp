@@ -5,10 +5,10 @@
 void SentimentDictionary::load(const std::string& positivePath, const std::string& negativePath) {
     std::ifstream positiveFile(positivePath);
     if (!positiveFile.is_open()) {
-        std::cerr << "Impossible d'ouvrir le fichier " << positivePath << " des mots positifs." << std::endl;
+        throw std::runtime_error("Impossible d'ouvrir le fichier " + positivePath + " des mots positifs.");
     } else {
         std::string word;
-        // Ajoute le mot au dictionnaire tant qu'il y a un mot 
+        // Ajoute le mot tant qu'il y a un mot 
         while (positiveFile >> word) {
             positiveWords.push_back(word);
         }
@@ -17,10 +17,10 @@ void SentimentDictionary::load(const std::string& positivePath, const std::strin
 
     std::ifstream negativeFile(negativePath);
     if (!negativeFile.is_open()) {
-        std::cerr << "Impossible d'ouvrir le fichier " << negativePath << " des mots negatifs." << std::endl;
+        throw std::runtime_error("Impossible d'ouvrir le fichier " + negativePath + " des mots négatifs.");
     } else {
         std::string word;
-        // Ajoute le mot au dictionnaire tant qu'il y a un mot 
+        // Ajoute le mot tant qu'il y a un mot 
         while (negativeFile >> word) {
             negativeWords.push_back(word);
         }
