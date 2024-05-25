@@ -8,7 +8,7 @@ std::vector<std::string> readDocument(const std::string& filePath) {
     std::ifstream file(filePath);
     
     if (!file.is_open()) {
-        std::cerr << "Impossible d'ouvrir le fichier " << filePath << std::endl;
+        throw std::runtime_error( "Impossible d'ouvrir le fichier " + filePath);
     } else {
         std::string word;
         while (file >> word) {
@@ -16,28 +16,37 @@ std::vector<std::string> readDocument(const std::string& filePath) {
             for (char& c : word) {
                 c = std::tolower(c);
             }
-            // Enlève les signes de ponctuation
-            std::string clean_word;
-            for (char c : word) {
-                if (std::ispunct(c)) { // On vérifie si le caractère est un signe de ponctuation
-                    // S'il est suivie d'une lettre, on ajoute le mot précédent en enlevant le signe et on commence le nouveau mot
-                    if (!clean_word.empty() && std::isalpha(clean_word.back())) {
-                        list.push_back(clean_word);
-                        clean_word.clear();
-                    }
-                } else {
-                    clean_word += c;
-                }
-            }
-            // Ajoute le mot final s'il n'est pas vide
-            if (!clean_word.empty()) {
-                list.push_back(clean_word);
-            }
+            // Nettoie le mot et ajoute les mots résultants à la liste
+            std::vector<std::string> cleanedWords = cleanWord(word);
+            list.insert(list.end(), cleanedWords.begin(), cleanedWords.end());
         }
     }
     file.close();
     return list;
 }
+
+std::vector<std::string> cleanWord(const std::string& word) {
+    // Enlève les signes de ponctuation
+    std::vector<std::string> cleanedWords;
+    std::string clean_word;
+    for (char c : word) {
+        if (std::ispunct(c)) { // On vérifie si le caractère est un signe de ponctuation
+            // S'il est suivi d'une lettre, on ajoute le mot précédent en enlevant le signe et on commence le nouveau mot
+            if (!clean_word.empty() && std::isalpha(clean_word.back())) {
+                cleanedWords.push_back(clean_word);
+                clean_word.clear();
+            }
+        } else {
+            clean_word += c;
+        }
+    }
+    // Ajoute le mot final s'il n'est pas vide
+    if (!clean_word.empty()) {
+        cleanedWords.push_back(clean_word);
+    }
+    return cleanedWords;
+}
+
 
 std::map<std::string, double> computeTF(const std::vector<std::string>& words) {
     std::map<std::string, double> TF_map;

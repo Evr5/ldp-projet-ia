@@ -4,6 +4,8 @@
 
 std::vector<std::string> readDocument(const std::string& filePath);
 
+std::vector<std::string> cleanWord(const std::string& word);&
+
 std::map<std::string, double> computeTF(const std::vector<std::string>& words);
 
 std::map<std::string, double> computeIDF(const std::vector<std::map<std::string, double>>& documentsTF, int totalDocuments);
