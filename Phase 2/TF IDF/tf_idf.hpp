@@ -4,7 +4,7 @@
 
 std::vector<std::string> readDocument(const std::string& filePath);
 
-std::vector<std::string> cleanWord(const std::string& word);&
+std::vector<std::string> cleanWord(const std::string& word);
 
 std::map<std::string, double> computeTF(const std::vector<std::string>& words);
 
